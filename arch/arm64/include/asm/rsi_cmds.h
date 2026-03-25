@@ -157,4 +157,27 @@ static inline unsigned long rsi_attestation_token_continue(phys_addr_t granule,
 	return res.a0;
 }
 
+static inline unsigned long rsi_get_rd_addr(unsigned long *rd_addr)
+{
+	struct arm_smccc_res res;
+
+	arm_smccc_1_1_invoke(SMC_RSI_GET_RD_ADDR, &res);
+	if (rd_addr)
+		*rd_addr = res.a1;
+	return res.a0;
+}
+
+static inline unsigned long rsi_map_mem(unsigned long guest_rd_addr,
+					unsigned long guest_ipa,
+					unsigned long image_ipa,
+					unsigned long map_size)
+{
+	struct arm_smccc_res res;
+
+	arm_smccc_1_1_invoke(SMC_RSI_MAP_MEM, guest_rd_addr, guest_ipa,
+			     image_ipa, map_size, &res);
+
+	return res.a0;
+}
+
 #endif /* __ASM_RSI_CMDS_H */

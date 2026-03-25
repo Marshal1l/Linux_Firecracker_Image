@@ -12,6 +12,8 @@
 
 DECLARE_STATIC_KEY_FALSE(rsi_present);
 
+int rsi_set_reserved_memory(phys_addr_t phys, size_t size);
+
 void __init arm64_rsi_init(void);
 
 bool __arm64_is_protected_mmio(phys_addr_t base, size_t size);

@@ -190,4 +190,24 @@ struct realm_config {
  */
 #define SMC_RSI_HOST_CALL			SMC_RSI_FID(0x199)
 
+/*
+ * Get Own Realm Descriptor
+ *
+ * ret0 == Status / error
+ * ret1 == RD
+ */
+#define SMC_RSI_GET_RD_ADDR SMC_RSI_FID(0x1b0)
+
+
+/*
+ * Map Realm Memory Region to Another Realm
+ *
+ * arg1 == another realm rd_addr
+ * arg2 == another realm cma ipa
+ * arg3 == this realm cma ipa
+ * arg4 == map memory size
+ * ret0 == Status / error
+ */
+#define SMC_RSI_MAP_MEM SMC_RSI_FID(0x1b1)
+
 #endif /* __ASM_RSI_SMC_H_ */

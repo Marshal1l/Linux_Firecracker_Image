@@ -13,6 +13,9 @@
 #include <asm/mem_encrypt.h>
 #include <asm/rsi.h>
 
+static phys_addr_t rsi_reserved_mem_phys = 0x80200000;
+static size_t rsi_reserved_mem_size = 0x01400000;
+
 static struct realm_config config;
 
 unsigned long prot_ns_shared;
@@ -20,6 +23,25 @@ EXPORT_SYMBOL(prot_ns_shared);
 
 DEFINE_STATIC_KEY_FALSE_RO(rsi_present);
 EXPORT_SYMBOL(rsi_present);
+
+/* 供image-server驱动调用 设置 reserved memory */
+int rsi_set_reserved_memory(phys_addr_t phys, size_t size)
+{
+	if (size == 0 || !phys) {
+		return -EINVAL;
+	}
+
+	rsi_reserved_mem_phys = phys;
+	rsi_reserved_mem_size = size;
+
+	pr_info("RSI: reserved memory set to phys=0x%llx, size=0x%zx\n",
+		(u64)phys, size);
+
+	/* 如果 rsi.c 中其他地方需要基于这个内存做初始化，可以在这里调用 */
+
+	return 0;
+}
+EXPORT_SYMBOL_GPL(rsi_set_reserved_memory);
 
 bool cc_platform_has(enum cc_attr attr)
 {
@@ -87,6 +109,12 @@ bool __arm64_is_protected_mmio(phys_addr_t base, size_t size)
 {
 	enum ripas ripas;
 	phys_addr_t end, top;
+	
+	//避免预定的CMA区域被识别为protected_mmio,导致内存属性不一致
+	if (base >= rsi_reserved_mem_phys &&
+	    base + size <= rsi_reserved_mem_phys + rsi_reserved_mem_size) {
+		return true;
+	}
 
 	/* Overflow ? */
 	if (WARN_ON(base + size <= base))
